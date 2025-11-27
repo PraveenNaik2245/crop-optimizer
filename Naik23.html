@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Pattern Optimizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background-color: #e6ffe6; 
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(52,211,153, 0.15) 0%, rgba(0,0,0,0) 60%),
+                radial-gradient(circle at 90% 80%, rgba(20,83,45, 0.1) 0%, rgba(0,0,0,0) 70%),
+                repeating-radial-gradient(circle at 50% 10%, #dcfce7 0%, #e6ffe6 10%, #e6ffe6 100%);
+            background-attachment: fixed;
+        }
+        .card {
+            box-shadow: 0 15px 40px rgba(0, 70, 0, 0.25); 
+            transition: transform 0.3s ease;
+            border: 1px solid #c8e6c9; 
+        }
+        .card:hover {
+            transform: translateY(-3px);
+        }
+        .input-field {
+            border: 2px solid #34d399; 
+            transition: all 0.2s;
+        }
+        .input-field:focus {
+            border-color: #059669; 
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.3);
+        }
+        .btn-primary {
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .btn-primary:hover {
+            background-color: #059669;
+            transform: translateY(-1px);
+        }
+        .btn-primary:active {
+            transform: translateY(1px);
+        }
+        .history-item {
+            cursor: pointer;
+            transition: background-color 0.1s;
+        }
+        .history-item:hover {
+            background-color: #6af59b; 
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8 flex items-start justify-center">
+
+    <div class="w-full max-w-6xl">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-extrabold text-gray-800">AI-Based Crop Pattern Optimizer</h1>
+            <p class="text-xl text-green-700 mt-2">Enter your agricultural inputs for a crop recommendation.</p>
+        </header>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        
+            <div class="md:col-span-1 bg-white rounded-xl p-6 shadow-xl border border-green-200 h-full">
+                <h2 class="text-xl font-bold text-green-800 border-b pb-2 mb-4 flex items-center justify-between">
+                    <span>Prediction History</span>
+                    <span id="user-id-display" class="text-xs text-gray-500 font-mono hidden"></span>
+                </h2>
+                <div id="history-list" class="space-y-3 max-h-[70vh] overflow-y-auto">
+                    <p id="loading-history" class="text-gray-500 italic">Loading prediction history...</p>
+                    <p id="no-history" class="text-gray-500 italic hidden">No past predictions found. Run an analysis!</p>
+                </div>
+            </div>
+            <div class="md:col-span-2">
+                <div class="w-full card bg-white rounded-xl p-6 md:p-10">
+                    <div id="input-form">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="md:col-span-2 grid grid-cols-3 gap-4">
+                                <div class="space-y-2">
+                                    <label for="n_input" class="block text-sm font-medium text-gray-700">Nitrogen (N) - ppm</label>
+                                    <input type="number" id="n_input" placeholder="e.g., 55" value="55" class="input-field w-full p-3 rounded-lg focus:outline-none" required>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="p_input" class="block text-sm font-medium text-gray-700">Phosphorus (P) - ppm</label>
+                                    <input type="number" id="p_input" placeholder="e.g., 32" value="32" class="input-field w-full p-3 rounded-lg focus:outline-none" required>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="k_input" class="block text-sm font-medium text-gray-700">Potassium (K) - ppm</label>
+                                    <input type="number" id="k_input" placeholder="e.g., 25" value="25" class="input-field w-full p-3 rounded-lg focus:outline-none" required>
+                                </div>
+                            </div>
+                            <div class="md:col-span-2 grid grid-cols-3 gap-4">
+                                <div class="space-y-2">
+                                    <label for="ca_input" class="block text-sm font-medium text-gray-700">Calcium (Ca) - ppm</label>
+                                    <input type="number" id="ca_input" placeholder="e.g., 500" value="500" class="input-field w-full p-3 rounded-lg focus:outline-none" required>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="mg_input" class="block text-sm font-medium text-gray-700">Magnesium (Mg) - ppm</label>
+                                    <input type="number" id="mg_input" placeholder="e.g., 70" value="70" class="input-field w-full p-3 rounded-lg focus:outline-none" required>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="s_input" class="block text-sm font-medium text-gray-700">Sulfur (S) - ppm</label>
+                                    <input type="number" id="s_input" placeholder="e.g., 30" value="30" class="input-field w-full p-3 rounded-lg focus:outline-none" required>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="ph_input" class="block text-sm font-medium text-gray-700">Soil pH</label>
+                                <input type="number" id="ph_input" step="0.1" placeholder="e.g., 6.5" value="6.5" class="input-field w-full p-3 rounded-lg focus:outline-none" required>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="area_input" class="block text-sm font-medium text-gray-700">Land Area (Acres)</label>
+                                <input type="number" id="area_input" placeholder="e.g., 10" value="10" class="input-field w-full p-3 rounded-lg focus:outline-none" required>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="soil_type_input" class="block text-sm font-medium text-gray-700">Soil Type</label>
+                                <select id="soil_type_input" class="input-field w-full p-3 rounded-lg focus:outline-none bg-white" required>
+                                    <option value="" disabled>Select Soil Type</option>
+                                    <option value="loamy" selected>Loamy (Ideal)</option>
+                                    <option value="clay">Clay</option>
+                                    <option value="sandy">Sandy</option>
+                                    <option value="silt">Silt</option>
+                                    <option value="peat">Peat</option>
+                                    <option value="chalky">Chalky</option>
+                                </select>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="temp_input" class="block text-sm font-medium text-gray-700">Avg. Temperature (°C)</label>
+                                <input type="number" id="temp_input" placeholder="e.g., 25" value="25" class="input-field w-full p-3 rounded-lg focus:outline-none" required>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="location_input" class="block text-sm font-medium text-gray-700">Location (City/Region)</label>
+                                <input type="text" id="location_input" placeholder="e.g., Central Valley, CA" value="Central Valley, CA" class="input-field w-full p-3 rounded-lg focus:outline-none" required>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="prev_crop_input" class="block text-sm font-medium text-gray-700">Previous Crop Grown</label>
+                                <input type="text" id="prev_crop_input" placeholder="e.g., Alfalfa, Corn, or None" value="Corn" class="input-field w-full p-3 rounded-lg focus:outline-none" required>
+                            </div>
+
+                        </div>
+
+                        <div class="mt-8 text-center">
+                            <button onclick="analyzeInputs(true)" class="btn-primary w-full md:w-1/2 py-3 px-6 bg-emerald-500 text-white font-bold rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-emerald-500 focus:ring-opacity-50">
+                                Get Crop Recommendation
+                            </button>
+                        </div>
+                    </div>
+                    <div id="result-container" class="mt-10 p-6 bg-green-100 rounded-xl hidden">
+                        <h2 class="text-2xl font-bold text-green-800 border-b pb-2 mb-4">Analysis Result</h2>
+                        <div id="result-message" class="text-lg text-gray-700 space-y-3">
+                        </div>
+                        <div id="error-message" class="text-red-600 mt-4 font-semibold p-3 border border-red-400 bg-red-100 rounded-lg hidden">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    <script type="module">
+        const LOCAL_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyCsLvGr-kOPiFDkpULX1ojcpcVwvBMfsHI", 
+            authDomain: "ai-base-crop-pattern-optimizer.firebaseapp.com",
+            projectId: "ai-base-crop-pattern-optimizer",
+            storageBucket: "ai-base-crop-pattern-optimizer.firebasestorage.app",
+            messagingSenderId: "364315358686",
+            appId: "1:364315358686:web:d09c9b359468e5a905d94f"
+        };
+        const LOCAL_APP_ID = LOCAL_FIREBASE_CONFIG.projectId || 'local-agri-app';
+
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, setLogLevel, collection, query, orderBy, limit, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        setLogLevel('Debug');
+
+        window.appId = typeof __app_id !== 'undefined' ? __app_id : LOCAL_APP_ID;
+        
+        window.firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : LOCAL_FIREBASE_CONFIG;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null; 
+
+        let app;
+        window.db = null;
+        window.auth = null;
+        window.userId = null;
+        window.isAuthReady = false;
+
+        async function initFirebase() {
+            try {
+                if (!window.firebaseConfig || !window.firebaseConfig.apiKey || window.firebaseConfig.apiKey.includes('YOUR_API_KEY')) {
+                    console.warn("⚠️ Using Placeholder Config. Firestore saving is disabled until you update LOCAL_FIREBASE_CONFIG with your real keys. ⚠️");
+                    window.isAuthReady = true; 
+                    return; 
+                }
+                app = initializeApp(window.firebaseConfig);
+                window.db = getFirestore(app);
+                window.auth = getAuth(app);
+                await signInAnonymously(window.auth);
+                console.log("Firebase: Signed in anonymously.");
+                onAuthStateChanged(window.auth, (user) => {
+                    if (user) {
+                        window.userId = user.uid;
+                    } else {
+                        window.userId = crypto.randomUUID(); 
+                    }
+                    window.isAuthReady = true;                    
+                    document.getElementById('user-id-display').textContent = `User: ${window.userId}`;
+                    document.getElementById('user-id-display').classList.remove('hidden');
+                    window.loadPastPredictions();
+                });
+
+            } catch (error) {
+                console.error("Firebase Initialization Error:", error);
+                document.getElementById('loading-history').textContent = `Error initializing Firebase: ${error.message}`;
+            }
+        }
+        window.firestore = { collection, query, orderBy, limit, addDoc, onSnapshot };
+        initFirebase();
+    </script>
+
+    <script>
+        const uiState = {
+            errorMessage: document.getElementById('error-message'),
+            resultContainer: document.getElementById('result-container'),
+            resultMessage: document.getElementById('result-message'),
+            historyList: document.getElementById('history-list'),
+            loadingHistory: document.getElementById('loading-history'),
+            noHistory: document.getElementById('no-history')
+        };
+        async function analyzeInputs(shouldSave = false) {
+            if (!window.isAuthReady && shouldSave) {
+                console.warn("Authentication not ready yet. Please wait a moment.");
+                return;
+            }
+
+            const inputs = {
+                N: parseFloat(document.getElementById('n_input').value),
+                P: parseFloat(document.getElementById('p_input').value),
+                K: parseFloat(document.getElementById('k_input').value),
+                Ca: parseFloat(document.getElementById('ca_input').value), 
+                Mg: parseFloat(document.getElementById('mg_input').value), 
+                S: parseFloat(document.getElementById('s_input').value),  
+                pH: parseFloat(document.getElementById('ph_input').value),
+                area: parseFloat(document.getElementById('area_input').value),
+                location: document.getElementById('location_input').value.trim(),
+                temp: parseFloat(document.getElementById('temp_input').value),
+                previousCrop: document.getElementById('prev_crop_input').value.trim().toLowerCase(),
+                soilType: document.getElementById('soil_type_input').value, 
+            };
+            const requiredNumericFields = ['N', 'P', 'K', 'Ca', 'Mg', 'S', 'pH', 'area', 'temp'];
+            const requiredTextFields = ['location', 'previousCrop', 'soilType'];
+
+            const missingNumeric = requiredNumericFields.find(key => isNaN(inputs[key]));
+            const missingText = requiredTextFields.find(key => inputs[key] === "");
+
+            if (missingNumeric || missingText) {
+                const missingField = missingNumeric ? missingNumeric : missingText;
+                uiState.errorMessage.textContent = missingNumeric 
+                    ? `Please enter a valid number for the ${missingField} input.`
+                    : `Please select or enter a value for the required field: ${missingField}.`;
+
+                console.error(`Validation failed. Missing or invalid input for: ${missingField}. Please fill this in.`);
+                uiState.errorMessage.classList.remove('hidden');
+                uiState.resultContainer.classList.add('hidden');
+                uiState.errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                return;
+            }
+            uiState.errorMessage.classList.add('hidden');
+            let recommendation = "";
+            let notes = "";
+            let color = "text-green-800"; 
+            let pros = [];
+            let cons = [];
+            let manureRecommendation = "Balanced NPK Granular Fertilizer (e.g., 10-10-10) as a base.";
+            
+            const { N, P, K, Ca, Mg, S, pH, area, location, temp, previousCrop, soilType } = inputs;
+            if (pH < 5.5) {
+                recommendation = "Blueberries or Acid-loving crops";
+                notes = "Soil is highly acidic. Requires liming for most common crops, but perfect for specialty crops like blueberries.";
+            } else if (pH > 7.5) {
+                recommendation = "Alfalfa or Alkaline-tolerant vegetables";
+                notes = "Soil is highly alkaline. Micronutrient deficiencies (like Iron) may be a concern.";
+                manureRecommendation += " Supplement with Iron chelate (Fe-EDDHA) to address Iron deficiency.";
+            } else if (N > 50 && P > 30 && K > 25) {
+                recommendation = "Maize (Corn) or High-yield Wheat";
+                notes = "Excellent, balanced nutrient profile for heavy feeders. Ensure adequate irrigation.";
+            } else if (N < 20 && P < 15 && K < 15) {
+                recommendation = "Cover Crops (e.g., Vetch) or Legumes";
+                notes = "Nutrient levels are low. Legumes can naturally fix nitrogen, improving soil health. Significant fertilization is needed for cash crops.";
+                color = "text-yellow-700";
+            } else if (temp > 30) {
+                recommendation = "Cotton, Millet, or Drought-tolerant Grains";
+                notes = `High average temperature (${temp}°C) suggests selecting heat and drought-resistant varieties.`;
+            } else {
+                recommendation = "General Vegetables (e.g., Cabbage, Tomatoes) or Pasture Grasses";
+                notes = "A suitable general profile. Focus on monitoring one specific limiting nutrient.";
+            }
+            let secondaryNotes = [];
+            let secondaryManure = [];
+            if (Ca < 200) {
+                secondaryNotes.push("LOW Calcium (Ca). Risk of blossom end rot in fruiting vegetables (e.g., tomatoes/peppers) and poor cell wall development.");
+                secondaryManure.push("Calcium Carbonate (Lime) or Gypsum (Calcium Sulfate) - Gypsum is better if pH is already optimal.");
+            } else if (Ca > 2000) {
+                 secondaryNotes.push("HIGH Calcium (Ca). May interfere with the uptake of Magnesium and Potassium.");
+            }
+            if (Mg < 50) {
+                secondaryNotes.push("LOW Magnesium (Mg). High risk of interveinal chlorosis (yellowing between leaf veins) in older leaves.");
+                secondaryManure.push("Dolomitic Lime (if pH is low) or Epsom Salts (Magnesium Sulfate) - fast-acting for foliar application.");
+            }
+
+            if (S < 20) {
+                secondaryNotes.push("LOW Sulfur (S). This nutrient is vital for protein synthesis and can limit Nitrogen use, especially for high-protein crops like Canola/Soybeans.");
+                secondaryManure.push("Ammonium Sulfate (provides N and S) or Gypsum (Calcium Sulfate) - depending on N/Ca needs.");
+            }
+
+            if (secondaryNotes.length > 0) {
+                notes = (notes ? notes + " " : "") + " **Secondary Nutrient Alert:** " + secondaryNotes.join(" ");
+                manureRecommendation += " **SECONDARY ADJUSTMENTS:** " + secondaryManure.join(" | ");
+            }
+            if (previousCrop.includes('corn') || previousCrop.includes('wheat') || previousCrop.includes('maize')) {
+                if (recommendation.includes("Maize") || recommendation.includes("Wheat")) {
+                    recommendation = "Soybeans or Alfalfa (Legumes)";
+                    notes = "WARNING: Consecutive planting of the same grain is discouraged. **Soybeans** are highly recommended for rotation. " + notes;
+                    color = "text-red-600";
+                }
+            }
+            
+            const soilDisplayName = soilType.charAt(0).toUpperCase() + soilType.slice(1);
+            if (soilType === 'sandy') {
+                notes += ` **Soil Type (${soilDisplayName}):** Requires high frequency irrigation or selection of very drought-tolerant crops due to rapid drainage.`;
+                if (!secondaryManure.includes("Organic Matter (Compost)")) {
+                     manureRecommendation += " | Apply **Organic Matter (Compost)** to improve water retention.";
+                }
+            } else if (soilType === 'clay') {
+                notes += ` **Soil Type (${soilDisplayName}):** Excellent nutrient retention, but poor drainage risks waterlogging.`;
+                if (temp > 25) {
+                    recommendation = "Rice (Paddy)"; 
+                    notes = `Ideal conditions for **Rice** due to high water retention capacity and warm temp. ` + notes;
+                    color = "text-blue-700";
+                }
+                if (!secondaryManure.includes("Gypsum")) {
+                    manureRecommendation += " | Application of **Gypsum** to improve soil structure and flocculation.";
+                }
+            } else if (soilType === 'peat' && S < 20) {
+                manureRecommendation += " | Peat soil often needs **Potassium Sulfate** to balance nutrients and provide Sulfur.";
+            }
+            console.log("Analysis complete. Generated Recommendation:", recommendation); 
+
+            const predictionData = {
+                N, P, K, Ca, Mg, S, pH, area, location, temp, previousCrop, soilType, 
+                recommendation, notes, color,
+                manureRecommendation, 
+                pros,                 
+                cons,                 
+                timestamp: Date.now()
+            };
+            displayResults(predictionData);
+            if (shouldSave && window.db && window.userId) {
+                 if (window.firebaseConfig && window.firebaseConfig.apiKey && window.firebaseConfig.apiKey.includes('YOUR_API_KEY')) {
+                    console.warn("Firestore save skipped: Firebase config is using placeholders.");
+                    return;
+                }
+                try {
+                    const predictionsRef = window.firestore.collection(window.db, `artifacts/${window.appId}/users/${window.userId}/predictions`);
+                    await window.firestore.addDoc(predictionsRef, predictionData);
+                    console.log("Prediction saved successfully to Firestore.");
+                } catch (e) {
+                    console.error("Error saving prediction: ", e);
+                }
+            }
+        }
+        function displayResults(data) {
+            const { N, P, K, Ca, Mg, S, pH, area, location, temp, previousCrop, soilType, recommendation, notes, color, manureRecommendation, pros, cons } = data;
+            if (!recommendation) {
+                uiState.resultMessage.innerHTML = `<p class="text-red-600 font-bold">Error: Crop recommendation could not be generated. Please check inputs and try again.</p>`;
+                uiState.resultContainer.classList.remove('hidden');
+                console.error("Attempted to display results, but recommendation field was empty.");
+                return;
+            }
+
+            const soilDisplayName = soilType.charAt(0).toUpperCase() + soilType.slice(1);
+            const defaultPros = pros.length > 0 ? pros : ["Soil nutrient and pH base analysis is complete.", "Opportunity for successful crop rotation."];
+            const defaultCons = cons.length > 0 ? cons : ["Check for micronutrient deficiencies (e.g., Zinc, Boron).", "Potential pest or disease pressure from prior crop if applicable."];
+            
+            uiState.resultMessage.innerHTML = `
+                <p><strong>Location:</strong> ${location} (Avg Temp: ${temp}°C)</p>
+                <p><strong>Land Area:</strong> ${area} Acres</p>
+                <p class="mt-2 text-lg"><strong>Previous Crop:</strong> <span class="font-bold text-blue-700">${previousCrop.charAt(0).toUpperCase() + previousCrop.slice(1)}</span></p>
+
+                <h3 class="text-xl font-semibold mt-4 text-green-600">Soil Status:</h3>
+                <ul class="list-disc list-inside ml-4 text-gray-700">
+                    <li>Type: <span class="font-bold bg-green-200 px-1 rounded">${soilDisplayName}</span></li>
+                    <li>pH Level: <span class="font-mono bg-gray-200 px-1 rounded">${pH}</span></li>
+                    <li>Nitrogen (N): <span class="font-mono bg-gray-200 px-1 rounded">${N} ppm</span></li>
+                    <li>Phosphorus (P): <span class="font-mono bg-gray-200 px-1 rounded">${P} ppm</span></li>
+                    <li>Potassium (K): <span class="font-mono bg-gray-200 px-1 rounded">${K} ppm</span></li>
+                    <li>Calcium (Ca): <span class="font-mono bg-gray-200 px-1 rounded">${Ca} ppm</span></li>
+                    <li>Magnesium (Mg): <span class="font-mono bg-gray-200 px-1 rounded">${Mg} ppm</span></li>
+                    <li>Sulfur (S): <span class="font-mono bg-gray-200 px-1 rounded">${S} ppm</span></li>
+                </ul>
+
+                <h3 class="text-2xl font-bold mt-6 ${color}">Recommended Crop: ${recommendation}</h3>
+                <p class="mt-2 italic text-gray-600">
+                    <span class="font-semibold">Notes:</span> ${notes}
+                </p>
+
+                <!-- Fertility Plan -->
+                <h3 class="text-xl font-semibold mt-6 text-blue-700 border-t pt-4">Fertility Plan for Better Yield</h3>
+                <p class="text-gray-700">
+                    To maximize the yield of <strong class="text-green-800">${recommendation}</strong>, follow this plan:
+                    <span class="font-bold text-blue-800 bg-blue-100 p-1 rounded block mt-2">${manureRecommendation}</span>
+                </p>
+
+                <!-- Pros and Cons -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                    <div class="p-3 bg-green-50 rounded-lg border border-green-300">
+                        <h4 class="text-lg font-semibold text-green-700">Pros (+)</h4>
+                        <ul class="list-disc list-inside ml-4 text-sm text-gray-600 space-y-1 mt-1">
+                            ${defaultPros.map(p => `<li>${p}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div class="p-3 bg-red-50 rounded-lg border border-red-300">
+                        <h4 class="text-lg font-semibold text-red-700">Cons (-)</h4>
+                        <ul class="list-disc list-inside ml-4 text-sm text-gray-600 space-y-1 mt-1">
+                            ${defaultCons.map(c => `<li>${c}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+            uiState.resultContainer.classList.remove('hidden');
+        }
+        window.loadPastPredictions = function() {
+            if (!window.db || !window.userId) {
+                uiState.loadingHistory.textContent = "Waiting for user authentication...";
+                return;
+            }
+             if (window.firebaseConfig && window.firebaseConfig.apiKey && window.firebaseConfig.apiKey.includes('YOUR_API_KEY')) {
+                uiState.loadingHistory.textContent = "History is disabled. Update LOCAL_FIREBASE_CONFIG to enable saving/loading.";
+                return;
+            }
+            const predictionsRef = window.firestore.collection(window.db, `artifacts/${window.appId}/users/${window.userId}/predictions`);
+            const q = window.firestore.query(predictionsRef, window.firestore.orderBy('timestamp', 'desc'), window.firestore.limit(10));
+
+            window.firestore.onSnapshot(q, (snapshot) => {
+                uiState.historyList.innerHTML = '';
+                uiState.loadingHistory.classList.add('hidden');
+                
+                if (snapshot.empty) {
+                    uiState.noHistory.classList.remove('hidden');
+                    return;
+                }
+                uiState.noHistory.classList.add('hidden');
+
+                snapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    const date = new Date(data.timestamp).toLocaleDateString();
+                    const time = new Date(data.timestamp).toLocaleTimeString();
+
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item p-3 border border-green-300 rounded-lg bg-green-50 shadow-sm';
+                    historyItem.innerHTML = `
+                        <p class="font-semibold text-green-800">${data.location}</p>
+                        <p class="text-sm text-gray-600 mt-1">
+                            <span class="font-bold">${data.recommendation || 'Analysis Pending'}</span>
+                            <br>
+                            <span class="text-xs text-gray-400">Soil: ${data.soilType ? data.soilType.charAt(0).toUpperCase() + data.soilType.slice(1) : 'N/A'}</span>
+                            <br>
+                            <span class="text-xs text-gray-400">${date} @ ${time}</span>
+                        </p>
+                    `;
+                    historyItem.onclick = () => {
+                        document.getElementById('n_input').value = data.N;
+                        document.getElementById('p_input').value = data.P;
+                        document.getElementById('k_input').value = data.K;
+                        document.getElementById('ca_input').value = data.Ca !== undefined && data.Ca !== null ? data.Ca : ''; 
+                        document.getElementById('mg_input').value = data.Mg !== undefined && data.Mg !== null ? data.Mg : ''; 
+                        document.getElementById('s_input').value = data.S !== undefined && data.S !== null ? data.S : '';  
+                        document.getElementById('ph_input').value = data.pH;
+                        document.getElementById('area_input').value = data.area;
+                        document.getElementById('location_input').value = data.location;
+                        document.getElementById('temp_input').value = data.temp;
+                        document.getElementById('prev_crop_input').value = data.previousCrop;
+                        document.getElementById('soil_type_input').value = data.soilType || ""; 
+                        displayResults(data); 
+                        document.getElementById('result-container').scrollIntoView({ behavior: 'smooth' });
+                    };
+
+                    uiState.historyList.appendChild(historyItem);
+                });
+            }, (error) => {
+                console.error("Error loading predictions:", error);
+                uiState.loadingHistory.textContent = `Error loading history: ${error.code}`;
+            });
+        };
+    </script>
+
+</body>
+</html>
